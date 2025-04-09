@@ -147,7 +147,7 @@ pos_status_t sensor_myuart_collect(void){
  * Driver export
  */
 ma_drv_export_t g_export = {
-  .version = DRV_SENSOR_VERSION(162, DRV_MYUART_VERSION), /* 161 is registered sensor type */
+  .version = DRV_SENSOR_VERSION(162, DRV_MYUART_VERSION), /* 162 is registered sensor type */
   .name = DRV_MYUART_NAME,
   .u.sensor={
     .power_set = sensor_myuart_set,
