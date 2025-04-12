@@ -262,8 +262,174 @@ The above code is a running RS232 based driver for O2 sensor. It includes follow
   * For example: .init = sensor_myuart_init (refer to other projects like drv_co2 for reference)
   * The main program will call this function with init flag = 1 (to-be-init) for the first time of running.  
 
-## Download to Target Board and Verify its Running
-TBD
+## Compile and Project Binary files
+In STM32CubeIDE, right click the name of the project and choose "Build Project" menu. Wait for new project binary files to be generated. Or if there's code error, it will stop compiling and prompts the errors in IDE's console panel. After the project binary is successfully generated, folloiwng folder will contain the final compiled binary:
+```
+/mnt/c/workspace/iEdge4.0/4.0/src/Listings$ ls -al
+total 4
+drwxrwxrwx 1 tliu tliu 4096 Apr 10 22:49 .
+drwxrwxrwx 1 tliu tliu 4096 Apr  7 23:30 ..
+-rwxrwxrwx 1 tliu tliu   20 Apr  7 23:30 .gitignore
+-rwxrwxrwx 1 tliu tliu  680 Apr  8 20:57 drv00a0_myadc.bin
+-rwxrwxrwx 1 tliu tliu  392 Apr  8 20:57 drv00a1_mymbus.bin
+-rwxrwxrwx 1 tliu tliu  512 Apr 10 22:49 drv00a2_myuart.bin
+```
+The binary file (dvr00a2_myuart.bin) is a special C program. iEdge 4.0 platform will recognize its format and calling its related functions for Power control and sensor collecting by "g_export" definitions. The generation contains two step:
+1. Compile and ELF file generating
+2. Objcopy from ELF to final Binary
+Please note only the binary file (*.bin) could be used in iEdge 4.0 target downloading & running.
 
+## Download to Target Board
+Below is the guide about how to download a new compiled binary onto the iEdge4.0 target board:
+1. Connect the USB port to an iEdge4.0 device
+2. Use a Serial Console utility to connect to iEdge4.0's serial port with 8N1 9600 baudrate 
+3. Turn on the serial console's chat window (or command window) which supports interact (or chat) window and finally write the full command towards target board. For example, SecureCRT's chat window
+4. In the chat window, type command "1" and ENTER to check the board response. If connection is correct, following would be seen:
+```
+Press following KEY for:
+    0 ... System reset
+    1 ... Show this help
+    2 ... Show running info
+    3 ... Erase all
+    4 ... XMODEM Program POS firmware
+    5 ... XMODEM Program MA firmware
+    6 ... XMODEM Program drivers
+    7 ... XMODEM Program User#2
+    8 ... XMODEM Program EEPROM CFG
+    9 ... Switch Main App Debug
+    + ... Change console 9600/115200 baudrate
+Note:
+  1) Console is always 9600 baudrate after reset
+```
+5. Once the connection is good, type command "stop" and ENTER to stop the device running. If the device happens to collecting data or reporting now, please be patient to wait for its done and "stop" command is process. Once "stop" command is processed by the device, following messages would be seen:
+```
+!!!OK!!! Please wait and check FSM is STOP.
+
+[49697364] FSM is STOP (arg=0x80000)
+```
+6. Sometime, system log or debug messages would be very frequent and hard to check the above response. Type command "info" and ENTER to check if the current device is is STOP state. Following is an example indicating the device is stopped now:
+```
+info
+[Running Info]
+            FSM: 0x80000 (STOP state) <=== This indicates it's STOP now and we can download new binaries now
+         Module: 0x4384/0x1004f (type/state)
+           Loop: 495 (main loop counter)
+           Duty: 276 (duty counter)
+       Main App: v4.0.4.5 (MA version)
+            POS: v1.0.2.13 (POS version)
+       Free Mem: 19616 (free heap size)
+    Mininal Mem: 18584 (history min free size)
+  Running Ticks: 49713852 (accumulated, unit ms)
+ Sleeping Ticks: 48588793 (accumulated, unit ms)
+       OS Stack: 876
+      APP Stack: 696
+     IDLE Stack: 64
+  Startup Stack: 0x4078
+       Poll Num: 0
+  NACK INIT/SYS: 0/0 (module/sys reset timeout)
+       Reserved: 01000000ef010000140100000000080002000000
+
+[Sensor Info]
+SLOT CYCLE(/P.) PWRms IO/ADD  THW0  THW1 TYPE VER/NAME(STAT/DUTY/CTRL/SRSV)
+ [0]   180/   0     1 0x0000     0     0    1 v1.21 VBAT (OK/49706150/139/0x5)
+ [1]   180/   0   750 0x0001     0     0    9 v1.11 CO2NS (OK/49706150/137/0x0)
+ [2]   180/   0     1 0x0700     0     0   11 v1.23 SHT30 (OK/49706150/137/0x3)
+```
+7. Type command "xupg" and ENTER. And then choose the serial console utility's Transfer XMODEM function to send the binary (drv00a2_myuart.bin) to the device. The downloading will take sometime. Please wait until it's done like below:
+```
+Please send file through XMODEM ...
+
+Start xmodem transferring. Press Ctrl+C to cancel.
+  100%     512 bytes  512 bytes/s 00:00:01       0 Errors
+
+
+Total Receive Bytes: 512
+
+Upgrade driver - MYUART, v1.0, 512 bytes.
+Unmount and wait ......
+
+!!!OK!!! Upgrade done.
+```
+
+## Activate a Sensor and Execute It Imediately
+The system has about 56KB flash to install any sensor or communication modules. Refer to below steps about how to activate a sensor (drv_myuart):
+1. Type command "list" and ENTERY to check what we have downloaded in this device. It could see following response with this command:
+```
+[DRIVER DIRECTORY]
+      Type         Filename            Class       Size       Disk Version
+    0x4000             LORA           Module       1352       1536 1.12
+    0x4181              ESP           Module       1256       1536 1.2
+    0x4183             A780           Module       1608       2048 1.5
+    0x4184             N306           Module       4028       4096 1.11
+    0x4185             BG95           Module       2876       3072 1.5
+    0x4186            MN316           Module       4052       4096 1.1
+    0x42FF          CONSOLE           Module        200        512 1.1
+    0x0009            CO2NS           Sensor       3904       4096 1.11
+    0x000A              EPD           Sensor      14060      14336 1.20
+    0x000B            SHT30           Sensor       4148       4608 1.23
+    0x0001             VBAT           Sensor       1176       1536 1.21
+    0x00A2           MYUART           Sensor        512        512 1.0
+                      Total                       39172      41984
+Total Remaining: 15360 Bytes
+```
+2. Assign the 0xa2 (or 162 in decimal) sensor type in sensor slot#3. In this example, slot#0/#1/#2 have been enabled with other sensors. We use #3 for the "MYUART". Type command "set type[3] 160" to assign this sensor into slot#3. Type "set cycle[3] 60" to choose a 60s duty cycle to call this sensor. Each command will turn a "!!!OK!!! xxxxx" messages. The response would be like:
+```
+set type[3] 162
+!!!OK!!! Type @0x114 is modified.)
+set cycle[3] 60
+!!!OK!!! Cycle @0x110 is modified.)
+```
+3. Type command "set ctrl 0x4005" to dump sensor reporting and debug messages. 
+4. Type command "dbg 5" to resume device running and immediately start a duty now. Since the myuart does not find a valie sensor, it probably works as below:
+```
+[50783706] myuart io (arg=0x2) <=== This is the "myuart"'s collecting function log
+
+[50783866] RX (len=0) 
+
+[50784025] RX (len=0) 
+
+[50784184] RX (len=0) 
+
+[50784343] RX (len=0) 
+
+[50784502] RX (len=0) 
+
+[50784661] RX (len=0) 
+
+[50784820] RX (len=0) 
+
+[50784979] RX (len=0) 
+
+[50785138] RX (len=0) 
+
+[50785297] RX (len=0) 
+
+[50785297] {"per":100,"vbat":4998,"rf":50,"co2":411,"tmp":20.6,"hum":20.7,"err":"no sensor data"} <=== When HW sensor is not ready, "err" will be prompted
+
+[50785297] tx (len=31) 2514202311284000005a03d77e6f640713864d0000003228019b0100ce0215
+
+[50789426] rx (len=12) 2514202311284000005adfff
+```
+5. Wait for 60s. And another myuart duty will collect and report again. This is due to the above "set cycle[3] 60" is using 60s duty cycle. 
+
+## De-activate a Sensor or Adjust a Sensor's Cycle/Duty Time
+Since sensor is controlled by any of eight duty slots, to choose a slot's cycle with ZERO will de-activate this slot (sensor). 
+1. De-activate a given slot
+   Below example commands, will deactivate slot #0/#1/#2
+  ```
+   set cycle[0] 0
+   set cycle[1] 0
+   set cycle[2] 0
+   ```
+2. De-activate all slots
+   ```
+   set cycle 0 
+   ```
+3. Adjust all slots with cycle (duty) time 0 (disable them all) and only set slot#3 as 60s
+   ```
+   set cycle 0
+   set cycle[3] 60
+   ```
+**Note: the duty/cycle change will happens on next duty. The device will check these change after current duty sleep/execution is done and use the new duty times for the next duty.**
 
 
