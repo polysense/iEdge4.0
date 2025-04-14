@@ -432,4 +432,159 @@ Since sensor is controlled by any of eight duty slots, to choose a slot's cycle 
    ```
 **Note: the duty/cycle change will happens on next duty. The device will check these change after current duty sleep/execution is done and use the new duty times for the next duty.**
 
+## Debug and Console Command Help
+Type "help" will list all console commands. It would be like:
+```
+help
+[APP v4.1.3.2 Help]
+Type following commands in chat window:
+ ADC PXn       : Show PIN (pa0~pf15) ADC Input
+ CFGO          : Show OneNET/CFG file
+ CFGP          : Show PIN/CFG file
+ CFGR          : Show CFG file
+ DBG XXXX      : Debug commands or help info
+ DEL XXXX or * : Delete Driver Type/Name (* for all)
+ DUMP          : Show all EEPROM CFG (including all zero fields)
+ HELP          : Show this help information
+ HELP DBG/PIN/SET : Show DBG/PIN/SET help information
+ INFO          : Show running information
+ INP PXn       : Show PIN (pa0~pf15) Input level
+ LIST          : List driver directory
+ MOD PXn xxx   : Set PIN (pa0~pf15) mode
+ ONE AAA BBB   : Set OneNET Field(AAA) to BBB
+ OTA X.X.X.X   : OTA image by version (Not supported)
+ OUT PXn 0/1   : Ouput PIN (pa0~pf15) 0/1
+ PIN AAA[n] BBB: Set PIN Field(AAA[n]) to BBB
+ PWD PXn xxx   : PWM ouput PIN (pa0~pf15) Duty (1~10000)
+ PWM PXn xxx   : PWM ouput PIN (pa0~pf15) Hz
+ PINS          : Show all PINs information
+ RTC YYMMDDHHMMSSWW : Set RTC BCD time
+ SET AAA BBB   : Set Field(AAA) to BBB
+ SHOW          : Show none-zero EEPROM CFG
+ SRUN          : Set FSM State RUN
+ STOP          : Set FSM State STOP
+ XUPG          : Xmodem upgrade (can be any firmware, configurations and drivers)
 
+Note:
+  1) BBB can be number or string according to each field
+  2) BBB can be * to clear this field to all ZERO/EMPTY
+  3) n is ZERO based
+```
+Or type "help dbg" to list all dbg commands:
+```
+ dbg 0         : Show this debug help
+ dbg 1         : Control Module Uart until ESCx2
+ dbg 1 1       : Quit TRANS mode and control Module Uart
+ dbg 2 XXXX    : Set module uart baudrate
+ dbg 3         : Backup current CFG to factory default
+ dbg 4         : 15s Auto Reset and Control Module Uart until ESCx2
+ dbg 5 XXXX    : Re-Schedule duty time
+ dbg 6 XXXX    : Set 0-allow sleeping, 1-never sleep
+ dbg 7 XXXX    : Set 0-require for confirm, 1-not require
+ dbg 8~23 XXX  : Uart0~15 debug under XXX baudrate
+ dbg 32~47 XXX : I2C0~15 debug under XXX baudrate
+ dbg AAA       : Get U32 memory [AAA], AAA should be >= 0x20000000
+ dbg AAA XXX   : Set U32 memory [AAA] to value XXX
+
+```
+Or type "help set" to list all SCFG set commands:
+```
+set Magic XXXXXXXX
+set Report XXXX
+set CTRL XXXX
+set EUI XXXXXXXXXXXXXXXX
+set LoRaEUI XXXXXXXXXXXXXXXX
+set LoRaAPP XXXXXXXXXXXXXXXX
+set LoRaKey XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+set LoRaASKey XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+set LoRaNSKey XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+set LoRaAddr XXXXXXXX
+set LoRaNonce XXXX
+set LoRaModel XX
+set LoRaAckLmt XX
+set LoRaAckDly XX
+set LoRaNBTrans XX
+set LoRaCtrl XX
+set LoRaPower XX
+set LoRaGroup XX
+set LoRaTX XX
+set LoRaRX XX
+set LoRaFlags XX
+set ResetModule XXXX
+set ResetSystem XXXX
+set MBUS XXXX
+set TCTRL XXXXXXXXXX
+set GRSV XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+set CALIB XX
+set DR XX
+set MIO XX
+set Console XX
+set Fixed XX
+set Cycle[0..7] XXXXXXXX
+set Type[0..7] XXXX
+set Power[0..7] XXXX
+set Periodic[0..7] XXXX
+set IO[0..7] XXXX
+set SRSV[0..7] XXXXXXXX
+set ARG[0..7] XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+set D0[0..7] XXXXXXXX
+set D1[0..7] XXXXXXXX
+set D2[0..7] XXXXXXXX
+set PID[0..7] XXXX
+set THW0[0..7] XXXX
+set THW1[0..7] XXXX
+set THW2[0..7] XXXX
+set THW3[0..7] XXXX
+set THW4[0..7] XXXX
+set THW5[0..7] XXXX
+set THW6[0..7] XXXX
+set THW7[0..7] XXXX
+set THLD[0..7] XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+set ROM[0..15] XXXXXXXXXXXXXXXX
+set Position XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+set Publish STRING[63]
+set Subscribe STRING[63]
+set MUSR STRING[15]
+set MPWD STRING[15]
+set MCID STRING[31]
+set DNS X.X.X.X
+set QOSP XX
+set QOSS XX
+set NRSV XXXXXXXXXXXX
+set Retry XX
+set Delay XX
+set Port XXXX
+set URL STRING[31]
+set BAND STRING[31]
+set APN STRING[31]
+set SSID STRING[31]
+set WRSVD XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+set WPWD STRING[15]
+```
+Or type "help pin" to list all GPIO PIN setup commands:
+```
+pin Magic 0xXX or XXXX (hex or decimal integer)
+pin Version 0xXX or XXXX (hex or decimal integer)
+pin LEDR PXXX
+pin LEDG PXXX
+pin LEDB PXXX
+pin LEDY PXXX
+pin PullUp PXXX
+pin PullDn PXXX
+pin PullUp2 PXXX
+pin PullDn2 PXXX
+pin SetH[0..7] PXXX
+pin SetL[0..7] PXXX
+pin PWR[0..31] PXXX
+pin Wire1[0..7] PXXX
+pin AIN[0..7] PXXX
+pin DIO[0..7] PXXX
+pin PWM[0..3] PXXX
+pin PMODE[0..3] 0xXX or XXXX (hex or decimal integer)
+pin CTRL[0..31] PXXX
+pin RSVD[0..95] PXXX
+pin UART0..15[0..3] PXXX
+pin LPUART0..15[0..3] PXXX
+pin I2C0..15[0..3] PXXX
+pin SPI0..15[0..3] PXXX
+```
