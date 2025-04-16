@@ -588,3 +588,427 @@ pin LPUART0..15[0..3] PXXX
 pin I2C0..15[0..3] PXXX
 pin SPI0..15[0..3] PXXX
 ```
+
+### Debug&Operation Examples
+#### Console Basic 
+The device debug console is default working at 9600 Baudrate, No FlowControl, Data 8, Stop 1. As a lower power UART console, it's preferred to work only with 9600 Baudrate. All input must be a full command. For example, "help\r". It does not support one by one character input and inline editting. So the best style is to use a Terminal tool like SecureCRT and type/edit commands in its interactive window. 
+1. System Information Check - "info"
+   This is a very useful command to check the current system running status, including: FSM state, module type, duty/loop counters, running/speeping time, stack/heap usage and sensor/slot configurations. Refer to below example:
+
+   ```
+    info
+    [Running Info]
+              FSM: 0x32000 (SLEEP state)
+          Module: 0x4006/0x1000f/0% (type/state/signal)
+            Loop: 531 (main loop counter)
+            Duty: 506 (duty counter)
+        Main App: v4.1.3.1 (MA version)
+              POS: v1.1.0.2 (POS version)
+        Free Mem: 18600 (free heap size)
+      Mininal Mem: 17048 (history min free size)
+    Running Ticks: 30478504 (accumulated, unit ms)
+    Sleeping Ticks: 29106846 (accumulated, unit ms)
+          OS Stack: 880
+          APP Stack: 704
+        IDLE Stack: 64
+      Startup Stack: 0x4078
+          Poll Num: 0
+      NACK INIT/SYS: 0/0 (module/sys reset timeout)
+          Reserved: 0100000013020000fa0100000020030000000000
+        Console/Ext: 0x11/0x10
+                RTC: 00000008275800 (2000-00-00 08:27:58 W0 X)
+
+    [Sensor Info]
+    SLOT CYCLE(/P.) PWRms IO/ADD  THW0  THW1 TYPE VER/NAME(STAT/DUTY/CTRL/SRSV)
+    [0]    60/   0     5 0x0000     0     0  160 v1.0 MYADC (OK/30505905/137/0x0)
+   ```
+
+2. Configuration Dump - "cfgr"
+   This command will dump all configurations. See below example:
+   ```
+   cfgr
+   [EEPROM CFG FILE]
+    set Magic 0x92747613
+    set Report 0x4006
+    set CTRL 0x400f
+    set EUI 3333333333333333
+    set LoRaEUI 3333333333333333
+    set LoRaAPP 2017060000000000
+    set LoRaKey 11223344556677889900aabbccddeeff
+    set LoRaNonce 0x360
+    set LoRaAckLmt 0x40
+    set LoRaAckDly 0x20
+    set LoRaNBTrans 0x1
+    set LoRaCtrl 0x2
+    set LoRaTX 2
+    set LoRaRX 222
+    set Cycle[0] 60
+    set Type[0] 0xa0
+    set Power[0] 5
+    set ARG[0] 000000000000000000000000000061ea
+    set PID[0] 60001
+    set Type[1] 0xb
+    set IO[1] 0x700
+    set SRSV[1] 0x3
+    set ARG[1] 000000000000000000000000000065ea
+    set PID[1] 60005
+    set Type[2] 0xa1
+    set Type[3] 0xa2
+    set Publish /iot/00000000/up/3333333333333333
+    set Subscribe /iot/00000000/dn/3333333333333333
+    set MUSR RDdemo
+    set MPWD polysense_0379
+    set MCID plss_3333333333333333
+    set DNS 8.8.8.8
+    set Port 1560
+    set URL ota.polysense.online
+    set BAND 5,8
+    set APN cmnbiot
+    set SSID plss_wifi
+    set WPWD polysense
+   ```
+
+3. Flash Directory Show - "list"
+   This command will list all the drivers within flash area and remaining flash size. See below example:
+   ```
+   list
+   [DRIVER DIRECTORY]
+      Type         Filename            Class       Size       Disk Version
+    0x42FF          CONSOLE           Module        260        512 1.3
+    0x0001             VBAT           Sensor       1176       1536 1.21
+    0x000A              EPD           Sensor      19244      19456 1.41
+    0x000B            SHT30           Sensor       4824       5120 1.30
+    0x00A0            MYADC           Sensor        680       1024 1.0
+    0x00A1           MYMBUS           Sensor        392        512 1.0
+    0x00A2           MYUART           Sensor        512        512 1.0
+    0x4000             LORA           Module       4396       4608 1.21
+                      Total                       31484      33280
+   Total Remaining: 24064 Bytes
+   ```
+
+4. Flash Driver Delete - "del XXXX(driver type value)"
+   This command will delete a certain driver by given XXXX type value. For example, "del 1" will delete VBAT driver. See below example:
+   ```
+   del 1
+   Unmount and wait ......
+   !!!OK!!! Driver has been erased. 
+   list
+   [DRIVER DIRECTORY]
+      Type         Filename            Class       Size       Disk Version
+    0x42FF          CONSOLE           Module        260        512 1.3
+    0x000A              EPD           Sensor      19244      19456 1.41
+    0x000B            SHT30           Sensor       4824       5120 1.30
+    0x00A0            MYADC           Sensor        680       1024 1.0
+    0x00A1           MYMBUS           Sensor        392        512 1.0
+    0x00A2           MYUART           Sensor        512        512 1.0
+    0x4000             LORA           Module       4396       4608 1.21
+                      Total                       30308      31744
+   Total Remaining: 25600 Bytes
+   [DRIVER DIRECTORY]
+      Type         Filename            Class       Size       Disk Version
+    0x42FF          CONSOLE           Module        260        512 1.3
+    0x0001             VBAT           Sensor       1176       1536 1.21
+    0x000A              EPD           Sensor      19244      19456 1.41
+    0x000B            SHT30           Sensor       4824       5120 1.30
+    0x00A0            MYADC           Sensor        680       1024 1.0
+    0x00A1           MYMBUS           Sensor        392        512 1.0
+    0x00A2           MYUART           Sensor        512        512 1.0
+    0x4000             LORA           Module       4396       4608 1.21
+                      Total                       31484      33280
+   Total Remaining: 24064 Bytes
+   ```
+   **Note: sometime if driver is being used and unable to get it done in short term, the delete will trigger a system reboot.**
+
+#### POS/MAIN/Driver/... Image Upgrading
+Console command "xupg" support to XMODEM upgrade a new file. In order to make sure the system healthy, it's always required that stop the system running by command - "stop", perform upgrading and finally resume the system running by command - "srun". See below example sequence:
+1. Stop FSM by command "stop"
+Type "stop" to stop the system running and wait for printing of "FSM is STOP". Do NOT upgrade an image during system running. It might broken the system sometime. See below example:
+```
+stop
+!!!OK!!! Please wait and check FSM is STOP.
+
+[31375264] sleep done (arg=0x2ef)
+
+[31375264] FSM is STOP (arg=0x80000)
+```
+2. XModerm Upgrade an image file by command "xupg"
+After type command "xupg", folloiwng prompts will be printed:
+```
+xupg
+Please send file through XMODEM ...
+............
+```
+Choose the Terminal tools' XMODEM transferring function, browse and select the file for uploading and wait for it's done. Below example upload "drv_vbat.bin" onto the target board:
+```
+Start xmodem Transferring. Press Ctrl+C to cancel.
+  100%       1 KB    1 KB/s 00:00:01       0 Errors
+
+
+Total Receive Bytes: 1176
+
+Upgrade driver - VBAT, v1.21, 1176 bytes.
+Unmount and wait ......
+
+[31667779] program driver (arg=0x8098)
+
+!!!OK!!! Upgrade done.
+```
+If the file is POS kernel image (pos.bin) or MAIN image (main.bin), it requires a double confirm. Type "y" to confirm the upgrading, or else it will be cancelled. Once it's confirmed, it will be really programmed onto the flash and then reboot system automatically with new upgraded files. See below of main.bin upgrading:
+```
+
+!!!WARNING!!! MA area will be erased. 
+Press Y to confirm ... Confirmed
+
+[Startup Mode]
+            POS: v1.1.0.2
+       Free Mem: 22544
+    Mininal Mem: 22544
+  Running Ticks: 2
+ Sleeping Ticks: 0
+       OS Stack: 1088
+      APP Stack: 1280
+     IDLE Stack: 64
+  Startup Stack: 0x4078
+       Reserved: 0000000000000000000000000000000000000000
+      Exp Sleep: 0
+Waiting for remote access ...
+Starting MA application ...
+
+Main  App: v4.1.3.2
+OS Kernel: v1.1.0.2
+
+Main App Normal mode.
+
+......
+```
+
+3. Resume System Ruunning by command "srun"
+This step is used only for driver image upgrading. Since POS kernel and MAIN image upgrading is always require a reboot, the system resuming operation is only required for sensor/module drivers. Or else, the system is always staying at STOP state. See below example:
+```
+!!!OK!!! Switch to RUN.
+
+[175555] FSM is RUN (arg=0x0)
+
+.....
+```
+
+#### POS/MAIN/Driver/... Image Upgrading without Manual Confirmation
+If the manual confirmation "y" is not preferred, type command "dbg 7 1" before the above Image Upgrading procedure. In this case, even if the pos.bin or main.bin is upgraded, the system will operate the final upgrading immediately without the wait for user confirmation. Below example is the command to disable such manual confirmation:
+```
+dbg 7 1
+Not require to confirm!
+```
+Or if you want to resume the double confirm, type command "dbg 7 0". For example:
+```
+dbg 7 0
+Require to confirm!
+```
+By each reboot default, it's always required to double confirm.
+
+#### Execute a Duty Report Immediately 
+Sometime, we want a duty report immediately withtout waiting for the next cycle time. It could be achieved by command "dbg 5". See below example:
+```
+dbg 5
+[645935] sleep done (arg=0x6b29)
+
+[645935] collect loop (arg=0xf)
+
+[645935] sensor age bmp (arg=0x10001)
+
+[645935] pwr set (arg=0x10a07)
+
+[645935] pwr set (arg=0x105ff)
+
+[645935] power on sleep ms (arg=0x5)
+
+[646209] collect (arg=0xa0)
+
+[646924] put (arg=0x1e)
+
+[646924] per (arg=0x16f)
+
+[646924] put (arg=0xd3e)
+
+[646924] mv (arg=0x207)
+
+[646924] power off (arg=0x0)
+
+[646924] pwr set (arg=0xa07)
+
+[646924] pwr set (arg=0x5ff)
+
+[646924] collect done len (arg=0x14)
+
+[647209] report start (arg=0x14)
+
+[647209] {"per":30,"mv":3390}
+
+[647209] tx (len=18) 2500333333333333333303d77e6f1e070d3e
+
+[647209] ext run (arg=0x10002)
+
+[647209] net rdy chk (arg=0x0)
+
+==>AT+RSSI
+
+<==+RSSI:1:-27:9
+
+OK
+
+
+==>AT+SEND=2:0:D77E6F1E070D3E
+
+<==
+OK
+
+
+<==+EVT:222:01:FF
++EVT:RX_!, PORT 222, DB 5, RSSI -27, SNR 9
+
+
+==>AT+RECV
+
+<==+RECV:2:DEFF
+
+OK
+
+
+[649410] slora rx (len=1) ff
+
+[649410] ma tx status (arg=0x0)
+
+[649410] rx raw (len=12) 25003333333333333333dfff
+
+[649410] plss udp cmd (len=1) ff
+
+[649410] report done (arg=0x0)
+
+[649630] ext run (arg=0x20001)
+
+[649630] sleep start (arg=0xdbf1)
+
+``` 
+
+
+#### Debug Print Control
+Following commands will control the printing of debug by different levels:
+1. "set ctrl 0x4000" - Normal PSM working mode and no debug printing
+
+2. "set ctrl 0x4001" - Normal PSM working mode and prints only TX/RX. See below:
+```
+set ctrl 0x4001
+!!!OK!!! CTRL @0x6 is modified.
+
+dbg 5
+
+[879779] {"per":31,"mv":3392}
+
+[879779] tx (len=18) 2500333333333333333303d77e6f1f070d40
+
+[881619] rx raw (len=12) 25003333333333333333dfff
+
+```
+2. "set ctrl 0x4005" - Normal PSM working mode and prints TX/RX and drivers' log. See below:
+```
+set ctrl 0x4005
+!!!OK!!! CTRL @0x6 is modified.
+
+dbg 5
+
+[952353] {"per":30,"mv":3390}
+
+[952353] tx (len=18) 2500333333333333333303d77e6f1e070d3e
+
+[956531] slora rx (len=1) ff
+
+[956531] rx raw (len=12) 25003333333333333333dfff
+
+```
+3. "set ctrl 0x400f" - Normal PSM working mode and prints all debug log. See below:
+```
+set ctrl 0x400f
+!!!OK!!! CTRL @0x6 is modified.
+
+dbg 5
+
+
+[1004837] sleep done (arg=0xbcb2)
+
+[1004837] collect loop (arg=0x24)
+
+[1004837] sensor age bmp (arg=0x10001)
+
+[1004837] pwr set (arg=0x10a07)
+
+[1004837] pwr set (arg=0x105ff)
+
+[1004837] power on sleep ms (arg=0x5)
+
+[1005119] collect (arg=0xa0)
+
+[1005836] put (arg=0x1e)
+
+[1005836] per (arg=0x16f)
+
+[1005836] put (arg=0xd3e)
+
+[1005836] mv (arg=0x207)
+
+[1005836] power off (arg=0x0)
+
+[1005836] pwr set (arg=0xa07)
+
+[1005836] pwr set (arg=0x5ff)
+
+[1005836] collect done len (arg=0x14)
+
+[1006130] report start (arg=0x14)
+
+[1006130] {"per":30,"mv":3390}
+
+[1006131] tx (len=18) 2500333333333333333303d77e6f1e070d3e
+
+[1006131] ext run (arg=0x10002)
+
+[1006131] net rdy chk (arg=0x0)
+
+==>AT+RSSI
+
+<==+RSSI:1:-27:10
+
+OK
+
+
+==>AT+SEND=2:0:D77E6F1E070D3E
+
+<==
+OK
+
+
+<==+EVT:222:01:FF
++EVT:RX_1, PORT 222, DR 5, RSCI -27, SNR 9
+
+
+==>AT+RECV
+
+<==+RECV:2:DEFF
+
+OK
+
+
+[1008338] slora rx (len=1) ff
+
+[1008338] ma tx status (arg=0x0)
+
+[1008338] rx raw (len=12) 25003333333333333333dfff
+
+[1008338] plss udp cmd (len=1) ff
+
+[1008338] report done (arg=0x0)
+
+[1008564] ext run (arg=0x20001)
+
+[1008564] sleep start (arg=0xdbd1)
+
+```
+**Note: more debug prints means much more power cost. For better battery life, please "set ctrl 0x4000" during normal working.**
