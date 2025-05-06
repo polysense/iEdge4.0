@@ -21,7 +21,7 @@ SystemWorkbench for STM32 or STM32CubeIDE is preferred to be used. In this guide
 3. **Git clone this library within this workspace**
 ```
   cd /mnt/c/workspace
-  git clone https://github.com/PolysenseTech/iEdge4.0
+  git clone https://github.com/polysense/iEdge4.0
 ```
 
 ## Projects Introduction
